@@ -31,7 +31,7 @@ class VersionMetrics(object):
         self.task_failure_count = 0
         self.task_timeout_count = 0
         self.task_system_failure_count = 0
-        self.estimated_cost = 0
+        self.estimated_cost = 0.0
 
         self._create_times: List[datetime] = []
         self._start_times: List[datetime] = []

@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.0.0 - 2020-12-21
+- Use pydantic for json serialization.
+
 ## 2.2.0 - 2020-12-04
 - Add support for the task annotations API.
 

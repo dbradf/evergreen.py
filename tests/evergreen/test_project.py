@@ -10,7 +10,7 @@ from evergreen.project import Project
 class TestProject(object):
     def test_most_recent_version(self, sample_project):
         mock_api = MagicMock()
-        project = Project(sample_project, mock_api)
+        project = Project(mock_api, **sample_project)
         mock_api.versions_by_project.return_value = (
             MagicMock(version_id=f"version_{i}") for i in range(3)
         )

@@ -5,7 +5,7 @@ import evergreen.task_annotations as under_test
 
 class TestTaskAnnotation(object):
     def test_getting_attributes(self, sample_task_annotation):
-        task_annotation = under_test.TaskAnnotation(sample_task_annotation, None)
+        task_annotation = under_test.TaskAnnotation(**sample_task_annotation)
 
         assert task_annotation.task_id == sample_task_annotation["task_id"]
         assert task_annotation.task_execution == sample_task_annotation["task_execution"]

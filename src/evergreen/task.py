@@ -1,13 +1,12 @@
 # -*- encoding: utf-8 -*-
 """Task representation of evergreen."""
-from __future__ import absolute_import
-
-from datetime import timedelta
+from datetime import datetime, timedelta
 from enum import IntEnum
-from typing import TYPE_CHECKING, Any, Callable, Dict, Iterable, List, Optional
+from typing import TYPE_CHECKING, Any, Callable, Dict, Iterable, List, Optional, Union
+
+from pydantic import BaseModel, Extra, PrivateAttr
 
 from evergreen.api_requests import IssueLinkRequest
-from evergreen.base import _BaseEvergreenObject, evg_attrib, evg_datetime_attrib
 from evergreen.manifest import Manifest
 from evergreen.task_annotations import TaskAnnotation
 
@@ -24,17 +23,13 @@ _EVG_DATE_FIELDS_IN_TASK = frozenset(
 )
 
 
-class Artifact(_BaseEvergreenObject):
+class Artifact(BaseModel):
     """Representation of a task artifact from evergreen."""
 
-    name = evg_attrib("name")
-    url = evg_attrib("url")
-    visibility = evg_attrib("visibility")
-    ignore_for_fetch = evg_attrib("ignore_for_fetch")
-
-    def __init__(self, json: Dict[str, Any], api: "EvergreenApi") -> None:
-        """Create an instance of an evergreen task artifact."""
-        super(Artifact, self).__init__(json, api)
+    name: str
+    url: str
+    visibility: str
+    ignore_for_fetch: bool
 
 
 class StatusScore(IntEnum):
@@ -64,83 +59,70 @@ class StatusScore(IntEnum):
         return StatusScore.FAILURE
 
 
-class StatusDetails(_BaseEvergreenObject):
+class StatusDetails(BaseModel):
     """Representation of a task status details from evergreen."""
 
-    status = evg_attrib("status")
-    type = evg_attrib("type")
-    desc = evg_attrib("desc")
-    timed_out = evg_attrib("timed_out")
-
-    def __init__(self, json: Dict[str, Any], api: "EvergreenApi") -> None:
-        """Create an instance of an evergreen task status details."""
-        super(StatusDetails, self).__init__(json, api)
+    status: str
+    type: str
+    desc: str
+    timed_out: bool
 
 
-class Task(_BaseEvergreenObject):
+class DisplayTaskDependency(BaseModel):
+    """Dependency on a display task."""
+
+    id: str
+    status: str
+
+
+class Task(BaseModel):
     """Representation of an Evergreen task."""
 
-    activated = evg_attrib("activated")
-    activated_by = evg_attrib("activated_by")
-    build_id = evg_attrib("build_id")
-    build_variant = evg_attrib("build_variant")
-    create_time = evg_datetime_attrib("create_time")
-    depends_on = evg_attrib("depends_on")
-    dispatch_time = evg_datetime_attrib("dispatch_time")
-    display_name = evg_attrib("display_name")
-    display_only = evg_attrib("display_only")
-    distro_id = evg_attrib("distro_id")
-    est_wait_to_start_ms = evg_attrib("est_wait_to_start_ms")
-    estimated_cost = evg_attrib("estimated_cost")
-    execution = evg_attrib("execution")
-    execution_tasks = evg_attrib("execution_tasks")
-    expected_duration_ms = evg_attrib("expected_duration_ms")
-    finish_time = evg_datetime_attrib("finish_time")
-    generate_task = evg_attrib("generate_task")
-    generated_by = evg_attrib("generated_by")
-    host_id = evg_attrib("host_id")
-    ingest_time = evg_datetime_attrib("ingest_time")
-    mainline = evg_attrib("mainline")
-    order = evg_attrib("order")
-    project_id = evg_attrib("project_id")
-    priority = evg_attrib("priority")
-    restarts = evg_attrib("restarts")
-    revision = evg_attrib("revision")
-    scheduled_time = evg_datetime_attrib("scheduled_time")
-    start_time = evg_datetime_attrib("start_time")
-    status = evg_attrib("status")
-    task_group = evg_attrib("task_group")
-    task_group_max_hosts = evg_attrib("task_group_max_hosts")
-    task_id = evg_attrib("task_id")
-    time_taken_ms = evg_attrib("time_taken_ms")
-    version_id = evg_attrib("version_id")
+    activated: bool
+    activated_by: str
+    artifacts: Optional[List[Artifact]]
+    build_id: str
+    build_variant: str
+    create_time: datetime
+    depends_on: Optional[List[Union[str, DisplayTaskDependency]]]
+    dispatch_time: Optional[datetime]
+    display_name: str
+    display_only: bool
+    distro_id: str
+    est_wait_to_start_ms: int
+    estimated_cost: float
+    execution: int
+    execution_tasks: Optional[List[str]]
+    expected_duration_ms: int
+    finish_time: Optional[datetime]
+    generate_task: bool
+    generated_by: str
+    host_id: str
+    ingest_time: Optional[datetime]
+    logs: Dict[str, Optional[str]]
+    mainline: Optional[bool]
+    order: int
+    project_id: str
+    priority: int
+    restarts: int
+    revision: str
+    scheduled_time: Optional[datetime]
+    start_time: Optional[datetime]
+    status: str
+    status_details: StatusDetails
+    task_group: Optional[str]
+    task_group_max_hosts: Optional[int]
+    task_id: str
+    time_taken_ms: int
+    version_id: str
 
-    def __init__(self, json: Dict[str, Any], api: "EvergreenApi") -> None:
+    _api: "EvergreenApi" = PrivateAttr()
+
+    def __init__(self, api: "EvergreenApi", **json: Dict[str, Any]) -> None:
         """Create an instance of an evergreen task."""
-        super(Task, self).__init__(json, api)
-        self._logs_map: Optional[Dict[Any, Any]] = None
+        super().__init__(**json)
 
-    @property
-    def artifacts(self) -> List[Artifact]:
-        """
-        Retrieve the artifacts for the given task.
-
-        :return: List of artifacts.
-        """
-        if not self.json.get("artifacts"):
-            return []
-        return [Artifact(artifact, self._api) for artifact in self.json["artifacts"]]
-
-    @property
-    def log_map(self) -> Dict:
-        """
-        Retrieve a dict of all the logs.
-
-        :return: Dictionary of the logs.
-        """
-        if not self._logs_map:
-            self._logs_map = {key: value for key, value in self.json["logs"].items()}
-        return self._logs_map
+        self._api = api
 
     def retrieve_log(self, log_name: str, raw: bool = False) -> str:
         """
@@ -150,7 +132,10 @@ class Task(_BaseEvergreenObject):
         :param raw: Retrieve raw version of log.
         :return: Contents of the specified log.
         """
-        return self._api.retrieve_task_log(self.log_map[log_name], raw)
+        log_url = self.logs.get(log_name)
+        if log_url:
+            return self._api.retrieve_task_log(log_url, raw)
+        return ""
 
     def stream_log(self, log_name: str) -> Iterable[str]:
         """
@@ -159,16 +144,10 @@ class Task(_BaseEvergreenObject):
         :param log_name: Log to stream.
         :return: Iterable log contents.
         """
-        return self._api.stream_log(self.log_map[log_name])
-
-    @property
-    def status_details(self) -> StatusDetails:
-        """
-        Retrieve the status details for the given task.
-
-        :return: Status details.
-        """
-        return StatusDetails(self.json["status_details"], self._api)
+        log_url = self.logs.get(log_name)
+        if log_url:
+            return self._api.stream_log(log_url)
+        return []
 
     def get_status_score(self) -> StatusScore:
         """
@@ -188,10 +167,10 @@ class Task(_BaseEvergreenObject):
         if self.execution == execution:
             return self
 
-        if "previous_executions" in self.json:
-            for task in self.json["previous_executions"]:
-                if task["execution"] == execution:
-                    return Task(task, self._api)
+        raw_task = self.dict()
+        for task in raw_task.get("previous_executions", []):
+            if task.get("execution") == execution:
+                return Task(self._api, **task)
 
         return None
 
@@ -273,7 +252,7 @@ class Task(_BaseEvergreenObject):
 
         :return: True if task is active.
         """
-        return self.scheduled_time and not self.finish_time
+        return bool(self.scheduled_time and not self.finish_time)
 
     def get_tests(
         self, status: Optional[str] = None, execution: Optional[int] = None
@@ -304,6 +283,9 @@ class Task(_BaseEvergreenObject):
         :return: List of execution tasks.
         """
         if self.display_only:
+            if not self.execution_tasks:
+                return []
+
             execution_tasks = [
                 self._api.task_by_id(task_id, fetch_all_executions=True)
                 for task_id in self.execution_tasks
@@ -315,6 +297,7 @@ class Task(_BaseEvergreenObject):
 
             if filter_fn:
                 return [task for task in execution_tasks if filter_fn(task)]
+
             return execution_tasks
 
         return None
@@ -352,4 +335,9 @@ class Task(_BaseEvergreenObject):
 
         :return: String representation of Task.
         """
-        return "Task({id})".format(id=self.task_id)
+        return f"Task({self.task_id})"
+
+    class Config:
+        """Pydantic configuration for tasks."""
+
+        extra = Extra.allow

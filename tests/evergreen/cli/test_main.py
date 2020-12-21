@@ -1,7 +1,4 @@
-try:
-    from unittest.mock import MagicMock
-except ImportError:
-    from mock import MagicMock
+from unittest.mock import MagicMock
 
 import pytest
 from click.testing import CliRunner
@@ -32,7 +29,7 @@ def _create_api_mock(monkeypatch):
 
 def test_list_hosts(monkeypatch, sample_host, output_fmt):
     evg_api_mock = _create_api_mock(monkeypatch)
-    evg_api_mock.all_hosts.return_value = [Host(sample_host, None)]
+    evg_api_mock.all_hosts.return_value = [Host(evg_api_mock, **sample_host)]
 
     runner = CliRunner()
     cmd_list = [output_fmt, "list-hosts"] if output_fmt else ["list-hosts"]
@@ -43,7 +40,9 @@ def test_list_hosts(monkeypatch, sample_host, output_fmt):
 
 def test_list_patches(monkeypatch, sample_patch, output_fmt):
     evg_api_mock = _create_api_mock(monkeypatch)
-    evg_api_mock.patches_by_project.return_value = [Patch(sample_patch, None) for _ in range(10)]
+    evg_api_mock.patches_by_project.return_value = [
+        Patch(evg_api_mock, **sample_patch) for _ in range(10)
+    ]
 
     runner = CliRunner()
     cmd_list = ["list-patches", "--project", "project", "--limit", "5"]
@@ -56,7 +55,9 @@ def test_list_patches(monkeypatch, sample_patch, output_fmt):
 
 def test_list_projects(monkeypatch, sample_project, output_fmt):
     evg_api_mock = _create_api_mock(monkeypatch)
-    evg_api_mock.all_projects.return_value = [Project(sample_project, None) for _ in range(10)]
+    evg_api_mock.all_projects.return_value = [
+        Project(evg_api_mock, **sample_project) for _ in range(10)
+    ]
 
     runner = CliRunner()
     cmd_list = ["list-projects"]

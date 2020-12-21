@@ -144,6 +144,12 @@ def sample_task_annotation():
 
 
 @pytest.fixture()
+def sample_recent_versions():
+    """Return sample recent versions data."""
+    return get_sample_json("recent_versions.json")
+
+
+@pytest.fixture()
 def mocked_api_response():
     """Mocked response returned by mock_api."""
     response_mock = MagicMock()

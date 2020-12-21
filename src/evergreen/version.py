@@ -1,11 +1,11 @@
 # -*- encoding: utf-8 -*-
 """Version representation of evergreen."""
-from __future__ import absolute_import
-
-from enum import Enum, auto
+from datetime import datetime
+from enum import Enum
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional
 
-from evergreen.base import _BaseEvergreenObject, evg_attrib, evg_datetime_attrib
+from pydantic import BaseModel, PrivateAttr
+
 from evergreen.manifest import ManifestModule
 from evergreen.metrics.versionmetrics import VersionMetrics
 
@@ -19,13 +19,13 @@ if TYPE_CHECKING:
 class Requester(Enum):
     """Requester that created version."""
 
-    PATCH_REQUEST = auto()
-    GITTER_REQUEST = auto()
-    GITHUB_PULL_REQUEST = auto()
-    MERGE_TEST = auto()
-    AD_HOC = auto()
-    TRIGGER_REQUEST = auto()
-    UNKNOWN = auto()
+    PATCH_REQUEST = "patch_request"
+    GITTER_REQUEST = "gitter_request"
+    GITHUB_PULL_REQUEST = "github_pull_request"
+    MERGE_TEST = "merge_test"
+    AD_HOC = "ad_hoc"
+    TRIGGER_REQUEST = "trigger_request"
+    UNKNOWN = "unknown"
 
     def evg_value(self) -> str:
         """Get the evergreen value for a requester."""
@@ -62,66 +62,53 @@ COMPLETED_STATES = {
 }
 
 
-class BuildVariantStatus(_BaseEvergreenObject):
+class BuildVariantStatus(BaseModel):
     """Representation of a Build Variants status."""
 
-    build_variant = evg_attrib("build_variant")
-    build_id = evg_attrib("build_id")
-
-    def __init__(self, json: Dict[str, Any], api: "EvergreenApi") -> None:
-        """Create an instance of a Build Variants status."""
-        super(BuildVariantStatus, self).__init__(json, api)
-
-    def get_build(self) -> "Build":
-        """Get the build object for this build variants status."""
-        return self._api.build_by_id(self.build_id)
+    build_variant: str
+    build_id: str
 
 
-class Version(_BaseEvergreenObject):
+class Version(BaseModel):
     """Representation of an Evergreen Version."""
 
-    version_id = evg_attrib("version_id")
-    create_time = evg_datetime_attrib("create_time")
-    start_time = evg_datetime_attrib("start_time")
-    finish_time = evg_datetime_attrib("finish_time")
-    revision = evg_attrib("revision")
-    order = evg_attrib("order")
-    project = evg_attrib("project")
-    author = evg_attrib("author")
-    author_email = evg_attrib("author_email")
-    message = evg_attrib("message")
-    status = evg_attrib("status")
-    repo = evg_attrib("repo")
-    branch = evg_attrib("branch")
-    errors = evg_attrib("errors")
-    warnings = evg_attrib("warnings")
-    ignored = evg_attrib("ignored")
+    version_id: str
+    create_time: datetime
+    start_time: Optional[datetime]
+    finish_time: Optional[datetime]
+    revision: str
+    order: int
+    project: str
+    author: str
+    author_email: str
+    message: str
+    status: str
+    repo: str
+    branch: str
+    # errors = evg_attrib("errors")
+    # warnings = evg_attrib("warnings")
+    ignored = bool
+    requester: Optional[Requester]
+    build_variants_status: Optional[List[BuildVariantStatus]]
 
-    def __init__(self, json: Dict[str, Any], api: "EvergreenApi") -> None:
+    _api: "EvergreenApi" = PrivateAttr()
+    _build_variants_map: Dict[str, str] = PrivateAttr()
+
+    def __init__(self, api: "EvergreenApi", **json: Dict[str, Any]) -> None:
         """
         Create an instance of an evergreen version.
 
         :param json: json representing version
         """
-        super(Version, self).__init__(json, api)
+        super().__init__(**json)
+        self._api = api
 
-        if "build_variants_status" in self.json and self.json["build_variants_status"]:
-            self.build_variants_map = {
-                bvs["build_variant"]: bvs["build_id"] for bvs in self.json["build_variants_status"]
+        self._build_variants_map = {}
+
+        if self.build_variants_status:
+            self._build_variants_map = {
+                bvs.build_variant: bvs.build_id for bvs in self.build_variants_status
             }
-
-    @property
-    def build_variants_status(self) -> List[BuildVariantStatus]:
-        """Get a list of build variant statuses."""
-        if "build_variants_status" not in self.json or not self.json["build_variants_status"]:
-            return []
-        build_variants_status = self.json["build_variants_status"]
-        return [BuildVariantStatus(bvs, self._api) for bvs in build_variants_status]
-
-    @property
-    def requester(self) -> Requester:
-        """Get the requester of this version."""
-        return Requester[self.json.get("requester", "UNKNOWN").upper()]
 
     def build_by_variant(self, build_variant: str) -> "Build":
         """
@@ -130,7 +117,7 @@ class Version(_BaseEvergreenObject):
         :param build_variant: Build variant to get build for.
         :return: Build object for variant.
         """
-        return self._api.build_by_id(self.build_variants_map[build_variant])
+        return self._api.build_by_id(self._build_variants_map[build_variant])
 
     def get_manifest(self) -> "Manifest":
         """
@@ -205,23 +192,3 @@ class Version(_BaseEvergreenObject):
         :return: String representation of Version.
         """
         return "Version({id})".format(id=self.version_id)
-
-
-class RecentVersions(_BaseEvergreenObject):
-    """Wrapper for the data object returned by /projects/{project_id}/recent_versions."""
-
-    rows = evg_attrib("rows")
-    build_variants = evg_attrib("build_variants")
-
-    @property
-    def versions(self) -> List[Version]:
-        """
-        Get the list of versions from the recent versions response object.
-
-        :return: List of versions from the response object
-        """
-        versions = []
-        for wrapper in self.json["versions"]:
-            versions += wrapper["versions"]
-
-        return [Version(version, self._api) for version in versions]  # type: ignore[arg-type]

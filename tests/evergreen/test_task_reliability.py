@@ -1,12 +1,10 @@
 # -*- encoding: utf-8 -*-
 """Unit tests for stats representation of evergreen."""
-from __future__ import absolute_import
-
-from evergreen.task_reliability import TaskReliability as tr
+import evergreen.task_reliability as under_test
 
 
 class TestTaskReliability(object):
     def test_get_attributes(self, sample_task_reliability):
-        task_reliability = tr(sample_task_reliability, None)
+        task_reliability = under_test.TaskReliability(**sample_task_reliability)
         assert task_reliability.task_name == sample_task_reliability["task_name"]
         assert task_reliability.success_rate == sample_task_reliability["success_rate"]

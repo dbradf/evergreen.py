@@ -1,46 +1,20 @@
 """Representation of project aliases."""
-from typing import TYPE_CHECKING, Any, Dict, List
+from typing import List, Optional
 
-from evergreen.base import _BaseEvergreenObject, evg_attrib
-
-if TYPE_CHECKING:
-    from evergreen.api import EvergreenApi
+from pydantic import Field
+from pydantic.main import BaseModel
 
 
-class DisplayTaskAlias(_BaseEvergreenObject):
+class DisplayTaskAlias(BaseModel):
     """Representation of a DisplayTask in an alias."""
 
-    name = evg_attrib("Name")
-    execution_tasks = evg_attrib("ExecutionTasks")
-
-    def __init__(self, json: Dict[str, Any], api: "EvergreenApi") -> None:
-        """
-        Create an instance of a display task alias.
-
-        :param json: json representing a display task alias.
-        :param api: instance of evergreen api object.
-        """
-        super().__init__(json, api)
+    name: str = Field(alias="Name")
+    execution_tasks: Optional[List[str]] = Field(alias="ExecutionTasks")
 
 
-class VariantAlias(_BaseEvergreenObject):
+class VariantAlias(BaseModel):
     """Representation of an alias for a particular build variant."""
 
-    variant = evg_attrib("Variant")
-    tasks = evg_attrib("Tasks")
-
-    def __init__(self, json: Dict[str, Any], api: "EvergreenApi") -> None:
-        """
-        Create an instance of a variant alias.
-
-        :param json: json representing variant alias.
-        :param api: instance of evergreen api object.
-        """
-        super().__init__(json, api)
-
-    @property
-    def display_tasks(self) -> List[DisplayTaskAlias]:
-        """Get a list of display tasks for the alias."""
-        if not self.json["DisplayTasks"]:
-            return []
-        return [DisplayTaskAlias(dt, self._api) for dt in self.json["DisplayTasks"]]
+    variant: str = Field(alias="Variant")
+    tasks: List[str] = Field(alias="Tasks")
+    display_tasks: List[DisplayTaskAlias] = Field(alias="DisplayTasks")

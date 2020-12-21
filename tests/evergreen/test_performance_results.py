@@ -2,14 +2,15 @@
 import random
 from copy import copy
 
+from dateutil.parser import parse
+
 from evergreen.performance_results import PerformanceData, _format_performance_results
-from evergreen.util import parse_evergreen_short_datetime
 
 
 class TestPerformanceResults(object):
     def test_adds_max_thread_level(self, sample_performance_results):
-        performance_data = PerformanceData(sample_performance_results, None)
-        results = performance_data.test_batch.test_runs[0].test_results
+        performance_data = PerformanceData(**sample_performance_results)
+        results = performance_data.test_batch.results[0].test_results
         results.reverse()
         assert results[0].thread_level == "max"
 
@@ -18,13 +19,13 @@ class TestPerformanceResults(object):
         data = list(sample_performance_results["data"]["results"][0]["results"].items())
         random.shuffle(data)
         duplicate["data"]["results"][0]["results"] = {key: val for key, val in data}
-        performance_data = PerformanceData(duplicate, None)
-        results = performance_data.test_batch.test_runs[0].test_results
+        performance_data = PerformanceData(**duplicate)
+        results = performance_data.test_batch.results[0].test_results
         thread_levels = [item.thread_level for item in results if item.thread_level != "max"]
         assert thread_levels == sorted(thread_levels)
 
     def test_deserialization(self, sample_performance_results):
-        performance_data = PerformanceData(sample_performance_results, None)
+        performance_data = PerformanceData(**sample_performance_results)
 
         assert performance_data.name == sample_performance_results["name"]
         assert performance_data.task_name == sample_performance_results["task_name"]
@@ -33,9 +34,7 @@ class TestPerformanceResults(object):
         assert performance_data.build_id == sample_performance_results["build_id"]
         assert performance_data.variant == sample_performance_results["variant"]
         assert performance_data.version_id == sample_performance_results["version_id"]
-        assert performance_data.create_time == parse_evergreen_short_datetime(
-            sample_performance_results["create_time"]
-        )
+        assert performance_data.create_time == parse(sample_performance_results["create_time"])
         assert performance_data.is_patch == sample_performance_results["is_patch"]
         assert performance_data.order == sample_performance_results["order"]
         assert performance_data.revision == sample_performance_results["revision"]
@@ -44,16 +43,18 @@ class TestPerformanceResults(object):
         test_batch = performance_data.test_batch
         test_batch_json = sample_performance_results["data"]
 
-        assert test_batch.start == test_batch_json["start"]
-        assert test_batch.end == test_batch_json["end"]
+        assert test_batch.start == parse(test_batch_json["start"])
+        assert test_batch.end == parse(test_batch_json["end"])
         assert test_batch.errors == test_batch_json["errors"]
         assert test_batch.storage_engine == test_batch_json["storageEngine"]
 
-        test_run = test_batch.test_runs[0]
+        test_run = test_batch.results[0]
         test_run_json = test_batch_json["results"][0]
 
-        assert test_run.start == test_run_json.get("start", test_run_json["results"]["start"])
-        assert test_run.end == test_run_json.get("end", test_run_json["results"]["end"])
+        assert test_run.start_time == parse(
+            test_run_json.get("start", test_run_json["results"]["start"])
+        )
+        assert test_run.end_time == parse(test_run_json.get("end", test_run_json["results"]["end"]))
         assert test_run.name == test_run_json["name"]
         assert (
             test_run.workload == test_run_json["workload"]
@@ -72,12 +73,12 @@ class TestPerformanceResults(object):
 
     def test_filtering_of_tests(self, sample_performance_results):
         tests = ["Aggregation.CountsFullCollection"]
-        performance_data = PerformanceData(sample_performance_results, None)
-        all_runs = performance_data.test_batch.test_runs
+        performance_data = PerformanceData(**sample_performance_results)
+        all_runs = performance_data.test_batch.results
         selected_runs = performance_data.test_batch.test_runs_matching(tests)
 
-        assert all(item.test_name in tests for item in selected_runs)
-        assert not all(item.test_name in tests for item in all_runs)
+        assert all(item.results in tests for item in selected_runs)
+        assert not all(item.results in tests for item in all_runs)
 
     # We are using specific data relating to https://jira.mongodb.org/browse/TIG-2022 in order to
     # test this since it failed on this specific data

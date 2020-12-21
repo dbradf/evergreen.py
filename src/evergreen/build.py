@@ -1,10 +1,10 @@
 # -*- encoding: utf-8 -*-
 """Representation of an evergreen build."""
-from __future__ import absolute_import
-
+from datetime import datetime
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional
 
-from evergreen.base import _BaseEvergreenObject, evg_attrib, evg_datetime_attrib
+from pydantic import BaseModel, Field, PrivateAttr
+
 from evergreen.metrics.buildmetrics import BuildMetrics
 
 if TYPE_CHECKING:
@@ -22,64 +22,55 @@ COMPLETED_STATES = {
 }
 
 
-class StatusCounts(_BaseEvergreenObject):
+class StatusCounts(BaseModel):
     """Representation of Evergreen StatusCounts."""
 
-    succeeded = evg_attrib("succeeded")
-    failed = evg_attrib("failed")
-    started = evg_attrib("started")
-    undispatched = evg_attrib("undispatched")
-    inactivate = evg_attrib("inactive")
-    dispatched = evg_attrib("dispatched")
-    timed_out = evg_attrib("timed_out")
-
-    def __init__(self, json: Dict[str, Any], api: "EvergreenApi") -> None:
-        """
-        Create a Status Counts object.
-
-        :param json: Json of status counts object.
-        :param api: Evergreen API.
-        """
-        super(StatusCounts, self).__init__(json, api)
+    succeeded: int
+    failed: int
+    started: int
+    undispatched: int
+    inactivate: Optional[int]
+    dispatched: int
+    timed_out: int
 
 
-class Build(_BaseEvergreenObject):
+class Build(BaseModel):
     """Representation of an Evergreen build."""
 
-    id = evg_attrib("_id")
-    project_id = evg_attrib("project_id")
-    create_time = evg_datetime_attrib("create_time")
-    start_time = evg_datetime_attrib("start_time")
-    finish_time = evg_datetime_attrib("finish_time")
-    version = evg_attrib("version")
-    branch = evg_attrib("branch")
-    git_hash = evg_attrib("git_hash")
-    build_variant = evg_attrib("build_variant")
-    status = evg_attrib("status")
-    activated = evg_attrib("activated")
-    activated_by = evg_attrib("activated_by")
-    activated_time = evg_datetime_attrib("activated_time")
-    order = evg_attrib("order")
-    tasks = evg_attrib("tasks")
-    time_taken_ms = evg_attrib("time_taken_ms")
-    display_name = evg_attrib("display_name")
-    predicted_makespan_ms = evg_attrib("predicted_makespan_ms")
-    actual_makespan_ms = evg_attrib("actual_makespan_ms")
-    origin = evg_attrib("origin")
+    id: str = Field(alias="_id")
+    project_id: str
+    create_time: Optional[datetime]
+    start_time: Optional[datetime]
+    finish_time: Optional[datetime]
+    version: str
+    branch: str
+    git_hash: str
+    build_variant: str
+    status: str
+    activated: bool
+    activated_by: str
+    activated_time: Optional[datetime]
+    order: int
+    tasks: List[str]
+    time_taken_ms: int
+    display_name: str
+    predicted_makespan_ms: int
+    actual_makespan_ms: int
+    origin: str
+    status_counts: StatusCounts
 
-    def __init__(self, json: Dict[str, Any], api: "EvergreenApi") -> None:
+    _api: "EvergreenApi" = PrivateAttr()
+
+    def __init__(self, api: "EvergreenApi", **json: Dict[str, Any]) -> None:
         """
         Create an instance of an evergreen task.
 
         :param json: Json of build object.
         :param api: Evergreen API.
         """
-        super(Build, self).__init__(json, api)
+        super().__init__(**json)
 
-    @property
-    def status_counts(self) -> StatusCounts:
-        """Get the status counts of the build."""
-        return StatusCounts(self.json["status_counts"], self._api)
+        self._api = api
 
     def get_tasks(self, fetch_all_executions: bool = False) -> List["Task"]:
         """
@@ -126,4 +117,4 @@ class Build(_BaseEvergreenObject):
 
         :return: String representation of Task.
         """
-        return "Build({id})".format(id=self.id)
+        return f"Build({self.id})"

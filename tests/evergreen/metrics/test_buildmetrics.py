@@ -17,6 +17,10 @@ def create_mock_build(task_list=None):
     return mock_build
 
 
+def create_mock_task(task_data):
+    return Task(MagicMock(), **task_data)
+
+
 class TestBuildMetrics(object):
     def test_build_metrics_empty_for_no_builds(self):
         mock_build = create_mock_build()
@@ -44,7 +48,7 @@ class TestBuildMetrics(object):
 
     def test_various_tasks(self, sample_task):
         n_tasks = 5
-        task_list = [Task(sample_task, None) for _ in range(n_tasks)]
+        task_list = [create_mock_task(sample_task) for _ in range(n_tasks)]
         mock_build = create_mock_build(task_list)
 
         build_metrics = under_test.BuildMetrics(mock_build).calculate()
@@ -57,7 +61,7 @@ class TestBuildMetrics(object):
 
     def test_adding_successful_task(self, sample_task):
         sample_task["status"] = "success"
-        task = Task(sample_task, None)
+        task = create_mock_task(sample_task)
         mock_build = create_mock_build()
 
         build_metrics = under_test.BuildMetrics(mock_build)
@@ -85,7 +89,7 @@ class TestBuildMetrics(object):
         n_tasks = 2
         sample_task["status"] = "success"
         sample_task["generated_by"] = "foobar"
-        task_list = [Task(sample_task, None) for _ in range(n_tasks)]
+        task_list = [create_mock_task(sample_task) for _ in range(n_tasks)]
 
         mock_build = create_mock_build(task_list)
 
@@ -97,7 +101,7 @@ class TestBuildMetrics(object):
 
     def test_adding_undispatched_task(self, sample_task):
         sample_task["status"] = "undispatched"
-        task = Task(sample_task, None)
+        task = create_mock_task(sample_task)
         mock_build = create_mock_build()
 
         build_metrics = under_test.BuildMetrics(mock_build)
@@ -117,7 +121,7 @@ class TestBuildMetrics(object):
         n_tasks = 2
         sample_task["status"] = "undispatched"
         sample_task["generated_by"] = "foobar"
-        task_list = [Task(sample_task, None) for _ in range(n_tasks)]
+        task_list = [create_mock_task(sample_task) for _ in range(n_tasks)]
 
         mock_build = create_mock_build(task_list)
 
@@ -128,7 +132,7 @@ class TestBuildMetrics(object):
 
     def test_adding_failed_task(self, sample_task):
         sample_task["status"] = "failed"
-        task = Task(sample_task, None)
+        task = create_mock_task(sample_task)
         mock_build = create_mock_build()
 
         build_metrics = under_test.BuildMetrics(mock_build)
@@ -156,7 +160,7 @@ class TestBuildMetrics(object):
         n_tasks = 2
         sample_task["status"] = "failed"
         sample_task["generated_by"] = "foobar"
-        task_list = [Task(sample_task, None) for _ in range(n_tasks)]
+        task_list = [create_mock_task(sample_task) for _ in range(n_tasks)]
 
         mock_build = create_mock_build(task_list)
 
@@ -171,7 +175,7 @@ class TestBuildMetrics(object):
         sample_task["status"] = "failed"
         sample_task["status_details"]["type"] = "system"
         sample_task["status_details"]["timed_out"] = True
-        task = Task(sample_task, None)
+        task = create_mock_task(sample_task)
         mock_build = create_mock_build()
 
         build_metrics = under_test.BuildMetrics(mock_build)
@@ -201,7 +205,7 @@ class TestBuildMetrics(object):
         sample_task["status_details"]["type"] = "system"
         sample_task["status_details"]["timed_out"] = False
         sample_task["generated_by"] = "foobar"
-        task_list = [Task(sample_task, None) for _ in range(n_tasks)]
+        task_list = [create_mock_task(sample_task) for _ in range(n_tasks)]
 
         mock_build = create_mock_build(task_list)
 
@@ -218,7 +222,7 @@ class TestBuildMetrics(object):
         sample_task["status_details"]["type"] = "system"
         sample_task["status_details"]["timed_out"] = True
         sample_task["generated_by"] = "foobar"
-        task_list = [Task(sample_task, None) for _ in range(n_tasks)]
+        task_list = [create_mock_task(sample_task) for _ in range(n_tasks)]
 
         mock_build = create_mock_build(task_list)
 
@@ -239,11 +243,7 @@ class TestBuildMetrics(object):
         sample_task_list[2]["generated_by"] = "foo"
 
         mock_build = create_mock_build(
-            [
-                Task(sample_task_list[0], None),
-                Task(sample_task_list[1], None),
-                Task(sample_task_list[2], None),
-            ]
+            [create_mock_task(sample_task) for sample_task in sample_task_list]
         )
 
         build_metrics = under_test.BuildMetrics(mock_build).calculate()
@@ -265,11 +265,7 @@ class TestBuildMetrics(object):
         sample_task_list[2]["generated_by"] = "foo"
 
         mock_build = create_mock_build(
-            [
-                Task(sample_task_list[0], None),
-                Task(sample_task_list[1], None),
-                Task(sample_task_list[2], None),
-            ]
+            [create_mock_task(sample_task) for sample_task in sample_task_list]
         )
 
         build_metrics = under_test.BuildMetrics(mock_build).calculate()
@@ -293,11 +289,7 @@ class TestBuildMetrics(object):
         sample_task_list[2]["generated_by"] = "foo"
 
         mock_build = create_mock_build(
-            [
-                Task(sample_task_list[0], None),
-                Task(sample_task_list[1], None),
-                Task(sample_task_list[2], None),
-            ]
+            [create_mock_task(sample_task) for sample_task in sample_task_list]
         )
 
         build_metrics = under_test.BuildMetrics(mock_build).calculate()
@@ -325,11 +317,7 @@ class TestBuildMetrics(object):
         sample_task_list[2]["generated_by"] = "foo"
 
         mock_build = create_mock_build(
-            [
-                Task(sample_task_list[0], None),
-                Task(sample_task_list[1], None),
-                Task(sample_task_list[2], None),
-            ]
+            [create_mock_task(sample_task) for sample_task in sample_task_list]
         )
 
         build_metrics = under_test.BuildMetrics(mock_build).calculate()
@@ -346,7 +334,7 @@ class TestBuildMetrics(object):
 
     def test_adding_task_without_ingest_time(self, sample_task):
         del sample_task["ingest_time"]
-        task = Task(sample_task, None)
+        task = create_mock_task(sample_task)
         mock_build = create_mock_build()
 
         build_metrics = under_test.BuildMetrics(mock_build)
@@ -369,7 +357,7 @@ class TestBuildMetrics(object):
         assert build_metrics.display_timed_out_count == 0
 
     def test_dict_format(self, sample_task):
-        task = Task(sample_task, None)
+        task = create_mock_task(sample_task)
         mock_build = create_mock_build()
 
         build_metrics = under_test.BuildMetrics(mock_build)
@@ -381,7 +369,7 @@ class TestBuildMetrics(object):
         assert "tasks" not in bm_dict
 
     def test_dict_format_with_children(self, sample_task):
-        task = Task(sample_task, None)
+        task = create_mock_task(sample_task)
         mock_build = create_mock_build([task])
 
         build_metrics = under_test.BuildMetrics(mock_build)
@@ -393,7 +381,7 @@ class TestBuildMetrics(object):
         assert bm_dict["tasks"][0]["task_id"] == task.task_id
 
     def test_string_format(self, sample_task):
-        task = Task(sample_task, None)
+        task = create_mock_task(sample_task)
         mock_build = create_mock_build([task])
 
         build_metrics = under_test.BuildMetrics(mock_build)
@@ -404,7 +392,7 @@ class TestBuildMetrics(object):
 
     def test_display_tasks_are_filtered(self, sample_task):
         sample_task["display_only"] = True
-        task = Task(sample_task, None)
+        task = create_mock_task(sample_task)
         mock_build = create_mock_build([task])
 
         build_metrics = under_test.BuildMetrics(mock_build)
@@ -415,11 +403,11 @@ class TestBuildMetrics(object):
 
     def test_task_filter(self, sample_task):
         n_tasks = 5
-        task_list = [Task(sample_task, None) for _ in range(n_tasks)]
+        task_list = [create_mock_task(sample_task) for _ in range(n_tasks)]
         sample_task_2 = sample_task.copy()
         filter_task_name = "filter me"
         sample_task_2["display_name"] = filter_task_name
-        task_list_2 = [Task(sample_task_2, None) for _ in range(n_tasks)]
+        task_list_2 = [create_mock_task(sample_task_2) for _ in range(n_tasks)]
         mock_build = create_mock_build(task_list + task_list_2)
 
         build_metrics = under_test.BuildMetrics(mock_build)
@@ -428,7 +416,7 @@ class TestBuildMetrics(object):
 
     def test_in_progress_task(self, sample_task):
         sample_task["finish_time"] = None
-        task = Task(sample_task, None)
+        task = create_mock_task(sample_task)
         mock_build = create_mock_build()
 
         build_metrics = under_test.BuildMetrics(mock_build)

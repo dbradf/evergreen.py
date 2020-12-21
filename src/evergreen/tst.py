@@ -1,55 +1,49 @@
 # -*- encoding: utf-8 -*-
 """Test representation of evergreen."""
-from __future__ import absolute_import
+from datetime import datetime
+from typing import TYPE_CHECKING, Any, Dict, Iterable, Optional
 
-from typing import TYPE_CHECKING, Any, Dict, Iterable
-
-from evergreen.base import _BaseEvergreenObject, evg_attrib, evg_datetime_attrib
+from pydantic import PrivateAttr
+from pydantic.main import BaseModel
 
 if TYPE_CHECKING:
     from evergreen.api import EvergreenApi
 
 
-class Logs(_BaseEvergreenObject):
+class Logs(BaseModel):
     """Representation of test logs from evergreen."""
 
-    url = evg_attrib("url")
-    line_num = evg_attrib("line_num")
-    url_raw = evg_attrib("url_raw")
-    log_id = evg_attrib("log_id")
+    url: Optional[str]
+    line_num: int
+    url_raw: Optional[str]
+    log_id: Optional[str]
 
-    def __init__(self, json: Dict[str, Any], api: "EvergreenApi") -> None:
-        """Create an instance of a Test log."""
-        super(Logs, self).__init__(json, api)
 
-    def stream(self) -> Iterable[str]:
+class Tst(BaseModel):
+    """Representation of a test object from evergreen."""
+
+    task_id: str
+    status: str
+    test_file: str
+    exit_code: int
+    start_time: datetime
+    end_time: Optional[datetime]
+    logs: Logs
+
+    _api: "EvergreenApi" = PrivateAttr()
+
+    def __init__(self, api: "EvergreenApi", **json: Dict[str, Any]) -> None:
+        """Create an instance of a Test object."""
+        super().__init__(**json)
+
+        self._api = api
+
+    def stream_log(self) -> Iterable[str]:
         """
         Retrieve an iterator of the streamed contents of this log.
 
         :return: Iterable to stream contents of log.
         """
-        return self._api.stream_log(self.url_raw)
-
-
-class Tst(_BaseEvergreenObject):
-    """Representation of a test object from evergreen."""
-
-    task_id = evg_attrib("task_id")
-    status = evg_attrib("status")
-    test_file = evg_attrib("test_file")
-    exit_code = evg_attrib("exit_code")
-    start_time = evg_datetime_attrib("start_time")
-    end_time = evg_datetime_attrib("end_time")
-
-    def __init__(self, json: Dict[str, Any], api: "EvergreenApi") -> None:
-        """Create an instance of a Test object."""
-        super(Tst, self).__init__(json, api)
-
-    @property
-    def logs(self) -> Logs:
-        """
-        Get the log object for the given test.
-
-        :return: log object for test.
-        """
-        return Logs(self.json["logs"], self._api)
+        if self.logs.url_raw:
+            return self._api.stream_log(self.logs.url_raw)
+        return []

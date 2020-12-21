@@ -1,53 +1,32 @@
 # -*- encoding: utf-8 -*-
 """Stats representation of evergreen."""
-from __future__ import absolute_import
+from datetime import date
 
-from typing import TYPE_CHECKING, Any, Dict
-
-from evergreen.base import _BaseEvergreenObject, evg_attrib, evg_date_attrib
-
-if TYPE_CHECKING:
-    from evergreen.api import EvergreenApi
+from pydantic import Field
+from pydantic.main import BaseModel
 
 
-class TestStats(_BaseEvergreenObject):
+class TestStats(BaseModel):
     """Representation of an Evergreen test stats object."""
 
-    test_file = evg_attrib("test_file")
-    task_name = evg_attrib("task_name")
-    test_name = evg_attrib("test_name")
-    variant = evg_attrib("variant")
-    distro = evg_attrib("distro")
-    evg_date_attrib("date")
-    num_pass = evg_attrib("num_pass")
-    num_fail = evg_attrib("num_fail")
-    avg_duration_pass = evg_attrib("avg_duration_pass")
-
-    def __init__(self, json: Dict[str, Any], api: "EvergreenApi") -> None:
-        """
-        Create an instance of a test stats object.
-
-        :param json: json version of object.
-        """
-        super(TestStats, self).__init__(json, api)
+    test_file: str
+    task_name: str
+    variant: str
+    distro: str
+    execution_date: date = Field(alias="date")
+    num_pass: int
+    num_fail: int
+    avg_duration_pass: float
 
 
-class TaskStats(_BaseEvergreenObject):
+class TaskStats(BaseModel):
     """Representation of an Evergreen task stats object."""
 
-    test_file = evg_attrib("test_file")
-    task_name = evg_attrib("task_name")
-    variant = evg_attrib("variant")
-    distro = evg_attrib("distro")
-    evg_date_attrib("date")
-    num_pass = evg_attrib("num_pass")
-    num_fail = evg_attrib("num_fail")
-    avg_duration_pass = evg_attrib("avg_duration_pass")
-
-    def __init__(self, json: Dict[str, Any], api: "EvergreenApi") -> None:
-        """
-        Create an instance of a test stats object.
-
-        :param json: json version of object.
-        """
-        super(TaskStats, self).__init__(json, api)
+    test_file: str
+    task_name: str
+    variant: str
+    distro: str
+    execution_date: date = Field(alias="date")
+    num_pass: int
+    num_fail: int
+    avg_duration_pass: float

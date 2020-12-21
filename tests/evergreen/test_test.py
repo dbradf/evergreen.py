@@ -7,20 +7,23 @@ from unittest.mock import MagicMock
 from evergreen.tst import Tst
 
 
+def create_mock_test(test_data):
+    return Tst(MagicMock(), **test_data)
+
+
 class TestTest(object):
     def test_get_attributes(self, sample_test):
-        test = Tst(sample_test, None)
+        test = create_mock_test(sample_test)
         assert test.task_id == sample_test["task_id"]
         assert test.exit_code == sample_test["exit_code"]
 
     def test_logs(self, sample_test):
-        test = Tst(sample_test, None)
+        test = create_mock_test(sample_test)
         assert test.logs.url == sample_test["logs"]["url"]
 
     def test_log_stream(self, sample_test):
-        mocked_api = MagicMock()
-        test = Tst(sample_test, mocked_api)
-        stream = test.logs.stream()
+        test = create_mock_test(sample_test)
+        stream = test.stream_log()
 
-        mocked_api.stream_log.assert_called_with(sample_test["logs"]["url_raw"])
-        assert stream == mocked_api.stream_log.return_value
+        test._api.stream_log.assert_called_with(sample_test["logs"]["url_raw"])
+        assert stream == test._api.stream_log.return_value

@@ -42,7 +42,7 @@ class BuildMetrics(object):
         self.display_timed_out_count = 0
         self.display_system_failure_count = 0
 
-        self.estimated_build_costs = 0
+        self.estimated_build_costs = 0.0
         self.total_processing_time = 0
 
         self._create_times: List[datetime] = []
@@ -265,7 +265,7 @@ class BuildMetrics(object):
             return 0
         return n_tasks / self.total_display_tasks
 
-    def _count_task(self, task: "Task") -> None:
+    def _count_task(self, task: "Task") -> None:  # noqa: C901
         """
         Add stats for the given task to the metrics.
 
@@ -306,17 +306,17 @@ class BuildMetrics(object):
 
         if task.ingest_time:
             self._create_times.append(task.ingest_time)
-        else:
+        elif task.start_time:
             self._create_times.append(task.start_time)
 
-        if task.start_time:
+        if task.finish_time:
             self._finish_times.append(task.finish_time)
 
         if task.start_time:
             self._start_times.append(task.start_time)
 
         self.estimated_build_costs += task.estimated_cost
-        self.total_processing_time += task.time_taken_ms / 1000
+        self.total_processing_time += task.time_taken_ms // 1000
 
     def _count_display_tasks(self) -> None:
         for _, tasks in self._display_map.items():
@@ -375,7 +375,7 @@ class BuildMetrics(object):
         }
 
         if include_children:
-            metric["tasks"] = [task.json for task in self.task_list]
+            metric["tasks"] = [task.dict() for task in self.task_list]
 
         return metric
 

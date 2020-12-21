@@ -15,8 +15,7 @@
   "build_id": "mongodb_mongo_master_linux_64_debug_patch_3a8290eef5c5934462b5cb84c9daded1b3073ad9_5c6469b6d6d80a06ba7b3aff_19_02_13_19_02_16",
   "distro_id": "rhel62-large",
   "build_variant": "linux-64-debug",
-  "depends_on": [ "mongodb_mongo_master_linux_64_debug_aggregation_patch_3a8290eef5c5934462b5cb84c9daded1b3073ad9_5c6469b6d6d80a06ba7b3aff_19_02_13_19_02_16"
-  ],
+  "depends_on": ["mongodb_mongo_master_linux_64_debug_aggregation_patch_3a8290eef5c5934462b5cb84c9daded1b3073ad9_5c6469b6d6d80a06ba7b3aff_19_02_13_19_02_16"],
   "display_name": "aggregation_auth",
   "host_id": "sir-eh3i5x3j",
   "restarts": 1,

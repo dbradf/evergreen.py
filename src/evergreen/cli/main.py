@@ -18,11 +18,11 @@ def fmt_output(fmt, data):
     Convert the given data into the specified format.
 
     :param fmt: DisplayFormat to use.
-    :param data: Data to convertn.
+    :param data: Data to convert.
     :return: Data is specified format.
     """
     if fmt == DisplayFormat.json:
-        return json.dumps(data, indent=4)
+        return json.dumps(data, indent=4, default=str)
     if fmt == DisplayFormat.yaml:
         return yaml.safe_dump(data)
     return data
@@ -57,7 +57,7 @@ def list_hosts(ctx):
     api = ctx.obj["api"]
     fmt = ctx.obj["format"]
     host_list = api.all_hosts()
-    click.echo(fmt_output(fmt, [host.json for host in host_list]))
+    click.echo(fmt_output(fmt, [host.dict() for host in host_list]))
 
 
 @cli.command()
@@ -70,7 +70,7 @@ def list_patches(ctx, project, limit):
     fmt = ctx.obj["format"]
     patches = []
     for i, p in enumerate(api.patches_by_project(project)):
-        patches.append(p.json)
+        patches.append(p.dict())
         if limit and i > limit:
             break
     click.echo(fmt_output(fmt, patches))
@@ -83,7 +83,7 @@ def list_projects(ctx):
     api = ctx.obj["api"]
     fmt = ctx.obj["format"]
     project_list = api.all_projects()
-    projects = [project.json for project in project_list]
+    projects = [project.dict() for project in project_list]
     click.echo(fmt_output(fmt, projects))
 
 

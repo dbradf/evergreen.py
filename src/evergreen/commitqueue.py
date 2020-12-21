@@ -2,51 +2,20 @@
 """Commit Queue representation of evergreen."""
 from __future__ import absolute_import
 
-from typing import TYPE_CHECKING, Any, Dict, List
+from typing import Any, List, Optional
 
-from evergreen.base import _BaseEvergreenObject, evg_attrib
-
-if TYPE_CHECKING:
-    from evergreen.api import EvergreenApi
+from pydantic.main import BaseModel
 
 
-class CommitQueueItem(_BaseEvergreenObject):
+class CommitQueueItem(BaseModel):
     """Representation of an entry in a commit queue."""
 
-    issue = evg_attrib("issue")
-    modules = evg_attrib("modules")
-
-    def __init__(self, json: Dict[str, Any], api: "EvergreenApi") -> None:
-        """
-        Create a CommitQueueItem object.
-
-        :param json: Commit queue item json.
-        :param api: Evergreen API.
-        """
-        super(CommitQueueItem, self).__init__(json, api)
+    issue: str
+    modules: Optional[Any]
 
 
-class CommitQueue(_BaseEvergreenObject):
+class CommitQueue(BaseModel):
     """Representation of a commit queue from evergreen."""
 
-    queue_id = evg_attrib("queue_id")
-
-    def __init__(self, json: Dict[str, Any], api: "EvergreenApi") -> None:
-        """
-        Create an instance of a commit queue from evergreen json.
-
-        :param json: Evergreen json representation of commit queue.
-        :param api: Evergreen api object.
-        """
-        super(CommitQueue, self).__init__(json, api)
-
-    @property
-    def queue(self) -> List[CommitQueueItem]:
-        """
-        Retrieve the queue for this commit queue.
-
-        :return: Queue of commits in the commit queue.
-        """
-        if not self.json["queue"]:
-            return []
-        return [CommitQueueItem(item, self._api) for item in self.json["queue"]]
+    queue_id: str
+    queue: Optional[List[CommitQueueItem]]
