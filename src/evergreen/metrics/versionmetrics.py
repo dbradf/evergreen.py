@@ -8,9 +8,9 @@ from typing import TYPE_CHECKING, Callable, Dict, List, Optional
 from structlog import get_logger
 
 if TYPE_CHECKING:
-    from evergreen.build import Build
+    from evergreen.api_models.build import Build
+    from evergreen.api_models.version import Version
     from evergreen.metrics.buildmetrics import BuildMetrics
-    from evergreen.version import Version
 
 LOGGER = get_logger(__name__)
 

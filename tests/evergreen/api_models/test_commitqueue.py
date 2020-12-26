@@ -2,7 +2,7 @@
 """Unit tests for src/evergreen/host.py."""
 from __future__ import absolute_import
 
-from evergreen.commitqueue import CommitQueue
+from evergreen.api_models.commitqueue import CommitQueue
 
 
 class TestCommitQueue(object):

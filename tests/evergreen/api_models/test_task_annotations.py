@@ -1,6 +1,6 @@
 """Unit tests for task_annotations."""
 
-import evergreen.task_annotations as under_test
+import evergreen.api_models.task_annotations as under_test
 
 
 class TestTaskAnnotation(object):

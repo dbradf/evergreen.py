@@ -9,8 +9,8 @@ from evergreen.metrics.buildmetrics import BuildMetrics
 
 if TYPE_CHECKING:
     from evergreen.api import EvergreenApi
-    from evergreen.task import Task  # noqa: F401
-    from evergreen.version import Version
+    from evergreen.api_models.task import Task  # noqa: F401
+    from evergreen.api_models.version import Version
 
 EVG_BUILD_STATUS_FAILED = "failed"
 EVG_BUILD_STATUS_SUCCESS = "success"

@@ -7,8 +7,8 @@ from unittest.mock import MagicMock
 import pytest
 
 import evergreen.metrics.buildmetrics as under_test
+from evergreen.api_models.task import Task
 from evergreen.errors.exceptions import ActiveTaskMetricsException
-from evergreen.task import Task
 
 
 def create_mock_build(task_list=None):

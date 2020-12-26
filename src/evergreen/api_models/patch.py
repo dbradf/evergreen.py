@@ -7,7 +7,7 @@ from pydantic.main import BaseModel
 
 if TYPE_CHECKING:
     from evergreen.api import EvergreenApi
-    from evergreen.version import Version
+    from evergreen.api_models.version import Version
 
 
 class GithubPatchData(BaseModel):

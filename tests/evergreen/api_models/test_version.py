@@ -6,9 +6,9 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from evergreen.manifest import Manifest
+from evergreen.api_models.manifest import Manifest
+from evergreen.api_models.version import Requester, Version
 from evergreen.metrics.versionmetrics import VersionMetrics
-from evergreen.version import Requester, Version
 
 SAMPLE_VERSION_ID_FOR_PATCH = "5c9e8453d6d80a457091d74e"
 EXPECTED_REQUESTER_PAIRS = [

@@ -5,7 +5,7 @@ from __future__ import absolute_import
 from datetime import datetime
 from unittest.mock import MagicMock
 
-from evergreen.host import Host
+from evergreen.api_models.host import Host
 
 
 def create_mock_host(host_data):

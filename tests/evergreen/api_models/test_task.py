@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from evergreen.task import _EVG_DATE_FIELDS_IN_TASK, StatusScore, Task
+from evergreen.api_models.task import _EVG_DATE_FIELDS_IN_TASK, StatusScore, Task
 
 
 def create_mock_task(task_data):

@@ -2,7 +2,7 @@
 """Unit tests for src/evergreen/host.py."""
 from __future__ import absolute_import
 
-from evergreen.distro import Distro
+from evergreen.api_models.distro import Distro
 
 
 class TestDistro(object):

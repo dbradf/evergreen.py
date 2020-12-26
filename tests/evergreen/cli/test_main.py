@@ -4,9 +4,9 @@ import pytest
 from click.testing import CliRunner
 
 import evergreen.cli.main as under_test
-from evergreen.host import Host
-from evergreen.patch import Patch
-from evergreen.project import Project
+from evergreen.api_models.host import Host
+from evergreen.api_models.patch import Patch
+from evergreen.api_models.project import Project
 
 output_formats = [
     "--json",

@@ -1,6 +1,6 @@
 """Unit tests for recent_versions.py."""
 
-import evergreen.recent_versions as under_test
+import evergreen.api_models.recent_versions as under_test
 
 
 class TestRecentVersions(object):

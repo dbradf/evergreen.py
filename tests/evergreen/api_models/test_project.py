@@ -4,7 +4,7 @@ from __future__ import absolute_import
 
 from unittest.mock import MagicMock
 
-from evergreen.project import Project
+from evergreen.api_models.project import Project
 
 
 class TestProject(object):

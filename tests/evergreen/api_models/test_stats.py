@@ -2,7 +2,7 @@
 """Unit tests for stats representation of evergreen."""
 from __future__ import absolute_import
 
-import evergreen.stats as under_test
+import evergreen.api_models.stats as under_test
 
 
 class TestTestStats(object):

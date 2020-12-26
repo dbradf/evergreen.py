@@ -4,7 +4,7 @@ from __future__ import absolute_import
 
 from unittest.mock import MagicMock
 
-from evergreen.patch import Patch
+from evergreen.api_models.patch import Patch
 
 
 def create_mock_patch(patch_data):

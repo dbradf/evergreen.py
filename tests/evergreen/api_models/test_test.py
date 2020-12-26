@@ -4,7 +4,7 @@ from __future__ import absolute_import
 
 from unittest.mock import MagicMock
 
-from evergreen.tst import Tst
+from evergreen.api_models.tst import Tst
 
 
 def create_mock_test(test_data):

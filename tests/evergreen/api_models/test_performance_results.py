@@ -4,7 +4,7 @@ from copy import copy
 
 from dateutil.parser import parse
 
-from evergreen.performance_results import PerformanceData, _format_performance_results
+from evergreen.api_models.performance_results import PerformanceData, _format_performance_results
 
 
 class TestPerformanceResults(object):

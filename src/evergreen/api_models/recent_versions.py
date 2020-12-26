@@ -6,8 +6,8 @@ from typing import Any, Dict, List, Optional, Set
 from pydantic import Field
 from pydantic.main import BaseModel
 
-from evergreen.build import StatusCounts
-from evergreen.version import BuildVariantStatus
+from evergreen.api_models.build import StatusCounts
+from evergreen.api_models.version import BuildVariantStatus
 
 
 class RecentBuild(BaseModel):

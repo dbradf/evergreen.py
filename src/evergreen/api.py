@@ -13,10 +13,23 @@ import structlog
 from structlog.stdlib import LoggerFactory
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
 
-from evergreen.alias import VariantAlias
+from evergreen.api_models.alias import VariantAlias
+from evergreen.api_models.build import Build
+from evergreen.api_models.commitqueue import CommitQueue
+from evergreen.api_models.distro import Distro
+from evergreen.api_models.host import Host
+from evergreen.api_models.manifest import Manifest
+from evergreen.api_models.patch import Patch
+from evergreen.api_models.performance_results import PerformanceData
+from evergreen.api_models.project import Project
+from evergreen.api_models.recent_versions import RecentVersions
+from evergreen.api_models.stats import TaskStats, TestStats
+from evergreen.api_models.task import Task
+from evergreen.api_models.task_annotations import TaskAnnotation
+from evergreen.api_models.task_reliability import TaskReliability
+from evergreen.api_models.tst import Tst
+from evergreen.api_models.version import Requester, Version
 from evergreen.api_requests import IssueLinkRequest
-from evergreen.build import Build
-from evergreen.commitqueue import CommitQueue
 from evergreen.config import (
     DEFAULT_API_SERVER,
     DEFAULT_NETWORK_TIMEOUT_SEC,
@@ -25,20 +38,7 @@ from evergreen.config import (
     read_evergreen_config,
     read_evergreen_from_file,
 )
-from evergreen.distro import Distro
-from evergreen.host import Host
-from evergreen.manifest import Manifest
-from evergreen.patch import Patch
-from evergreen.performance_results import PerformanceData
-from evergreen.project import Project
-from evergreen.recent_versions import RecentVersions
-from evergreen.stats import TaskStats, TestStats
-from evergreen.task import Task
-from evergreen.task_annotations import TaskAnnotation
-from evergreen.task_reliability import TaskReliability
-from evergreen.tst import Tst
 from evergreen.util import evergreen_input_to_output, format_evergreen_date, iterate_by_time_window
-from evergreen.version import Requester, Version
 
 try:
     from urlparse import urlparse

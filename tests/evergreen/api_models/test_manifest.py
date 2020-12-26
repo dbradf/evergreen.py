@@ -2,7 +2,7 @@
 """Unit tests for src/evergreen/manifest.py."""
 from __future__ import absolute_import
 
-from evergreen.manifest import Manifest
+from evergreen.api_models.manifest import Manifest
 
 
 class TestManifest(object):

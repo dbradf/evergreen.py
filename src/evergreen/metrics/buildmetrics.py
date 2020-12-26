@@ -8,12 +8,12 @@ from typing import TYPE_CHECKING, Callable, Dict, List, Optional
 
 from structlog import get_logger
 
+from evergreen.api_models.task import StatusScore
 from evergreen.errors.exceptions import ActiveTaskMetricsException
-from evergreen.task import StatusScore
 
 if TYPE_CHECKING:
-    from evergreen.build import Build
-    from evergreen.task import Task
+    from evergreen.api_models.build import Build
+    from evergreen.api_models.task import Task
 
 
 LOGGER = get_logger(__name__)

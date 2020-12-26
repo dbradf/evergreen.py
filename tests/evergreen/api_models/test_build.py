@@ -4,7 +4,7 @@ from __future__ import absolute_import
 
 from unittest.mock import MagicMock
 
-from evergreen.build import Build
+from evergreen.api_models.build import Build
 from evergreen.metrics.buildmetrics import BuildMetrics
 
 

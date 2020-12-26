@@ -2,7 +2,7 @@
 from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
-    from evergreen.task import Task
+    from evergreen.api_models.task import Task
 
 
 class EvergreenException(Exception):

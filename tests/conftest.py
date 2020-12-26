@@ -6,8 +6,8 @@ import pytest
 import yaml
 
 from evergreen.api import CachedEvergreenApi, EvergreenApi, RetryingEvergreenApi
+from evergreen.api_models.version import Requester
 from evergreen.config import EvgAuth
-from evergreen.version import Requester
 
 TESTS_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 SAMPLE_DATA_PATH = os.path.join(TESTS_DIRECTORY, "evergreen", "data")

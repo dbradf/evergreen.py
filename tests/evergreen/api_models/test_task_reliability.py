@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 """Unit tests for stats representation of evergreen."""
-import evergreen.task_reliability as under_test
+import evergreen.api_models.task_reliability as under_test
 
 
 class TestTaskReliability(object):

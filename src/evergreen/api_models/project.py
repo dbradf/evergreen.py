@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from pydantic import BaseModel, PrivateAttr
 
-from evergreen.version import Version
+from evergreen.api_models.version import Version
 
 if TYPE_CHECKING:
     from evergreen.api import EvergreenApi

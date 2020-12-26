@@ -6,14 +6,14 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional
 
 from pydantic import BaseModel, PrivateAttr
 
-from evergreen.manifest import ManifestModule
+from evergreen.api_models.manifest import ManifestModule
 from evergreen.metrics.versionmetrics import VersionMetrics
 
 if TYPE_CHECKING:
     from evergreen.api import EvergreenApi
-    from evergreen.build import Build
-    from evergreen.manifest import Manifest
-    from evergreen.patch import Patch  # noqa: F401
+    from evergreen.api_models.build import Build
+    from evergreen.api_models.manifest import Manifest
+    from evergreen.api_models.patch import Patch  # noqa: F401
 
 
 class Requester(Enum):

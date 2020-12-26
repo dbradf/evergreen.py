@@ -6,9 +6,9 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, Iterable, List, Optional,
 
 from pydantic import BaseModel, Extra, PrivateAttr
 
+from evergreen.api_models.manifest import Manifest
+from evergreen.api_models.task_annotations import TaskAnnotation
 from evergreen.api_requests import IssueLinkRequest
-from evergreen.manifest import Manifest
-from evergreen.task_annotations import TaskAnnotation
 
 if TYPE_CHECKING:
     from evergreen.api import EvergreenApi
