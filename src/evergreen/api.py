@@ -29,7 +29,7 @@ from evergreen.api_models.task_annotations import TaskAnnotation
 from evergreen.api_models.task_reliability import TaskReliability
 from evergreen.api_models.tst import Tst
 from evergreen.api_models.version import Requester, Version
-from evergreen.api_requests import IssueLinkRequest
+from evergreen.api_requests import IssueLinkRequest, StatsSpecification
 from evergreen.config import (
     DEFAULT_API_SERVER,
     DEFAULT_NETWORK_TIMEOUT_SEC,
@@ -38,7 +38,7 @@ from evergreen.config import (
     read_evergreen_config,
     read_evergreen_from_file,
 )
-from evergreen.util import evergreen_input_to_output, format_evergreen_date, iterate_by_time_window
+from evergreen.util import evergreen_input_to_output, iterate_by_time_window
 
 try:
     from urlparse import urlparse
@@ -502,55 +502,16 @@ class EvergreenApi(object):
 
     def test_stats_by_project(
         self,
-        project_id: str,
-        after_date: datetime,
-        before_date: datetime,
-        group_num_days: Optional[int] = None,
-        requesters: Optional[Requester] = None,
-        tests: Optional[List[str]] = None,
-        tasks: Optional[List[str]] = None,
-        variants: Optional[List[str]] = None,
-        distros: Optional[List[str]] = None,
-        group_by: Optional[str] = None,
-        sort: Optional[str] = None,
+        stats_spec: StatsSpecification,
     ) -> List[TestStats]:
         """
-        Get a patch by patch id.
+        Get the test stats for project.
 
-        :param project_id: Id of patch to query for.
-        :param after_date: Collect stats after this date.
-        :param before_date: Collect stats before this date.
-        :param group_num_days: Aggregate statistics to this size.
-        :param requesters: Filter by requestors (mainline, patch, trigger, or adhoc).
-        :param tests: Only include specified tests.
-        :param tasks: Only include specified tasks.
-        :param variants: Only include specified variants.
-        :param distros: Only include specified distros.
-        :param group_by: How to group results (test_task_variant, test_task, or test)
-        :param sort: How to sort results (earliest or latest).
-        :return: Patch queried for.
+        :param stats_spec: Specification for what tests to query.
+        :return: Test stats for the given specification.
         """
-        params: Dict[str, Any] = {
-            "after_date": format_evergreen_date(after_date),
-            "before_date": format_evergreen_date(before_date),
-        }
-        if group_num_days:
-            params["group_num_days"] = group_num_days
-        if requesters:
-            params["requesters"] = requesters
-        if tests:
-            params["tests"] = tests
-        if tasks:
-            params["tasks"] = tasks
-        if variants:
-            params["variants"] = variants
-        if distros:
-            params["distros"] = distros
-        if group_by:
-            params["group_by"] = group_by
-        if sort:
-            params["sort"] = sort
-        url = self._create_url(f"/projects/{project_id}/test_stats")
+        params = stats_spec.get_params()
+        url = self._create_url(f"/projects/{stats_spec.project_id}/test_stats")
         test_stats_list = self._paginate(url, params)
         return [TestStats(**test_stat) for test_stat in test_stats_list]
 
@@ -582,103 +543,37 @@ class EvergreenApi(object):
 
     def task_stats_by_project(
         self,
-        project_id: str,
-        after_date: datetime,
-        before_date: datetime,
-        group_num_days: Optional[int] = None,
-        requesters: Optional[Requester] = None,
-        tasks: Optional[List[str]] = None,
-        variants: Optional[List[str]] = None,
-        distros: Optional[List[str]] = None,
-        group_by: Optional[str] = None,
-        sort: Optional[str] = None,
+        stats_spec: StatsSpecification,
     ) -> List[TaskStats]:
         """
         Get task stats by project id.
 
-        :param project_id: Id of patch to query for.
-        :param after_date: Collect stats after this date.
-        :param before_date: Collect stats before this date.
-        :param group_num_days: Aggregate statistics to this size.
-        :param requesters: Filter by requestors (mainline, patch, trigger, or adhoc).
-        :param tasks: Only include specified tasks.
-        :param variants: Only include specified variants.
-        :param distros: Only include specified distros.
-        :param group_by: How to group results (test_task_variant, test_task, or test)
-        :param sort: How to sort results (earliest or latest).
-        :return: Patch queried for.
+        :param stats_spec: Specification for what tasks to query.
+        :return: Task stats for the given specification.
         """
-        params: Dict[str, Any] = {
-            "after_date": format_evergreen_date(after_date),
-            "before_date": format_evergreen_date(before_date),
-        }
-        if group_num_days:
-            params["group_num_days"] = group_num_days
-        if requesters:
-            params["requesters"] = requesters.stats_value()
-        if tasks:
-            params["tasks"] = tasks
-        if variants:
-            params["variants"] = variants
-        if distros:
-            params["distros"] = distros
-        if group_by:
-            params["group_by"] = group_by
-        if sort:
-            params["sort"] = sort
-        url = self._create_url(f"/projects/{project_id}/task_stats")
+        if stats_spec.tests is not None:
+            raise ValueError("'tests' param is invalid for task stats.")
+
+        params = stats_spec.get_params()
+        url = self._create_url(f"/projects/{stats_spec.project_id}/task_stats")
         task_stats_list = self._paginate(url, params)
         return [TaskStats(**task_stat) for task_stat in task_stats_list]
 
     def task_reliability_by_project(
         self,
-        project_id: str,
-        after_date: Optional[datetime] = None,
-        before_date: Optional[datetime] = None,
-        group_num_days: Optional[int] = None,
-        requesters: Optional[Requester] = None,
-        tasks: Optional[List[str]] = None,
-        variants: Optional[List[str]] = None,
-        distros: Optional[List[str]] = None,
-        group_by: Optional[str] = None,
-        sort: Optional[str] = None,
+        stats_spec: StatsSpecification,
     ) -> List[TaskReliability]:
         """
         Get task reliability scores.
 
-        :param project_id: Id of patch to query for.
-        :param after_date: Collect stats after this date.
-        :param before_date: Collect stats before this date, defaults to nothing.
-        :param group_num_days: Aggregate statistics to this size.
-        :param requesters: Filter by requesters (mainline, patch, trigger, or adhoc).
-        :param tasks: Only include specified tasks.
-        :param variants: Only include specified variants.
-        :param distros: Only include specified distros.
-        :param group_by: How to group results (test_task_variant, test_task, or test)
-        :param sort: How to sort results (earliest or latest).
-        :return: Patch queried for.
+        :param stats_spec: Specification for what tasks to query.
+        :return: Task reliability stats for the given specification.
         """
-        params: Dict[str, Any] = {}
-        if after_date:
-            params["after_date"] = format_evergreen_date(after_date)
-        if before_date:
-            params["before_date"] = format_evergreen_date(before_date)
-        if group_num_days:
-            params["group_num_days"] = group_num_days
-        if requesters:
-            params["requesters"] = requesters.stats_value()
-        if tasks:
-            params["tasks"] = tasks
-        if variants:
-            params["variants"] = variants
-        if distros:
-            params["distros"] = distros
-        if group_by:
-            params["group_by"] = group_by
-        if sort:
-            params["sort"] = sort
+        if stats_spec.tests is not None:
+            raise ValueError("'tests' param is invalid for task stats.")
 
-        url = self._create_url(f"/projects/{project_id}/task_reliability")
+        params = stats_spec.get_params()
+        url = self._create_url(f"/projects/{stats_spec.project_id}/task_reliability")
         task_reliability_scores = self._paginate(url, params)
         return [TaskReliability(**task_reliability) for task_reliability in task_reliability_scores]
 
